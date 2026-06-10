@@ -1,0 +1,311 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* All buttons share these base styles */
+button {
+    border: 1px solid black;
+    padding: 1px 4px;
+    cursor: pointer;
+    background: transparent;
+}
+
+/* ── Toolbar ── */
+#toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-bottom: 1px solid black;
+    background: white;
+    flex-wrap: wrap;
+}
+
+.tb-group {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+}
+
+.tb-sep {
+    width: 1px;
+    height: 20px;
+    margin: 0 4px;
+    background: black;
+    flex-shrink: 0;
+}
+
+#status {
+    margin-left: auto;
+}
+
+/* ── Editor ── */
+#editor {
+    padding: 16px;
+}
+
+/* ── Component blocks ── */
+.component-block {
+    border: 1px solid black;
+    margin-bottom: 12px;
+}
+
+.block-label {
+    padding: 3px 8px;
+    border-bottom: 1px solid black;
+    font-weight: bold;
+}
+
+/* ── Fields ── */
+.field {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid black;
+}
+
+.field:last-child {
+    border-bottom: none;
+}
+
+.field-label {
+    padding: 6px 8px 4px;
+    border-right: 1px solid black;
+    min-width: 56px;
+}
+
+.field-body {
+    flex: 1;
+    padding: 2px 0;
+    min-height: 28px;
+}
+
+/* ── Editables ── */
+[contenteditable] {
+    outline: none;
+    display: inline-block;
+    min-width: 2ch;
+    border: 1px solid black;
+    padding: 1px 4px;
+    line-height: 1.5;
+}
+
+.para-editable {
+    display: block;
+    width: 100%;
+    padding: 4px 8px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ── Insert strips ── */
+/* Always in flow; hidden until hovered directly or an adjacent item-row is hovered */
+.insert-strip {
+    display: flex;
+    justify-content: center;
+    padding: 2px 0;
+    min-height: 12px;
+    visibility: hidden;
+}
+
+.insert-strip:hover,
+.item-row:hover + .insert-strip,
+.insert-strip:has(+ .item-row:hover),
+.body-list > .insert-strip {
+    visibility: visible;
+}
+
+.insert-btn {
+    padding: 1px 8px;
+}
+
+/* ── Item rows (title rows, list items) ── */
+.item-inner {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 3px 6px;
+}
+
+.item-controls {
+    display: flex;
+    visibility: hidden;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.item-row:hover .item-controls {
+    visibility: visible;
+}
+
+.empty-list {
+    padding: 4px 6px;
+}
+
+/* ── Title rows ── */
+.title-row-content {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.row-key {
+    font-weight: bold;
+    min-width: 6ch;
+}
+
+.row-value {
+    min-width: 12ch;
+}
+
+/* ── Body list ── */
+.body-list {
+    padding: 4px 0;
+}
+
+.body-item-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 0 6px;
+}
+
+.body-item-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    visibility: hidden;
+    flex-shrink: 0;
+    padding-top: 4px;
+}
+
+.body-item-row:hover .body-item-controls {
+    visibility: visible;
+}
+
+.comp-block {
+    flex: 1;
+    border: 1px solid black;
+}
+
+.comp-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 6px;
+    border-bottom: 1px solid black;
+}
+
+/* Table title field in toolbar */
+.table-title-label, .hdr-field-label {
+    font-weight: bold;
+}
+
+.table-title-input {
+    min-width: 24ch;
+}
+
+/* ── Table ── */
+.table-toolbar {
+    padding: 3px 8px;
+    border-bottom: 1px solid black;
+}
+
+.tbl-editor {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.tbl-editor :is(th, td) {
+    border: 1px solid black;
+    padding: 2px 4px;
+    vertical-align: top;
+    white-space: nowrap;
+    height: 1px;
+}
+
+/* Row-controls column strips its border */
+.row-ctrl-th, .row-ctrl-td {
+    border: none;
+    padding: 2px;
+}
+
+.row-ctrl-td {
+    visibility: hidden;
+}
+
+.tbl-data-row:hover .row-ctrl-td {
+    visibility: visible;
+}
+
+/* Insert rows */
+.tbl-insert-row {
+    visibility: hidden;
+}
+
+.tbl-insert-row :is(td, th) {
+    border: none;
+    padding: 0;
+}
+
+.tbl-data-row:hover + .tbl-insert-row,
+.tbl-insert-row:has(+ .tbl-data-row:hover),
+.tbl-insert-row:only-child {
+    visibility: visible;
+}
+
+/* Column control row */
+.col-ctrl-row th {
+    border: none;
+    text-align: center;
+    padding: 1px 2px;
+}
+
+/* Header cells */
+.hdr-fields {
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+}
+
+.hdr-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.hdr-text {
+    min-width: 8ch;
+}
+
+.hdr-width {
+    min-width: 4ch;
+}
+
+.insert-col-btn {
+    padding: 0 3px;
+    align-self: flex-end;
+}
+
+/* Misc */
+.cell-text {
+    min-width: 6ch;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-width: 30vw;
+    display: block;
+    width: 100%;
+    min-height: 100%;
+}
+
+.list-item-text {
+    min-width: 20ch;
+}
+
+.error-msg {
+    white-space: pre;
+}
