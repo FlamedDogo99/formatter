@@ -26,10 +26,7 @@ let STYLES_XML = '';
 let LOGO_BUFFER = null;
 
 export async function loadAssets(stylesUrl, logoUrl) {
-    const [stylesText, logoArrayBuffer] = await Promise.all([
-        fetch(stylesUrl).then(r => r.text()),
-        fetch(logoUrl).then(r => r.arrayBuffer()),
-    ]);
+    const [stylesText, logoArrayBuffer] = await Promise.all([fetch(stylesUrl).then(r => r.text()), fetch(logoUrl).then(r => r.arrayBuffer()),]);
     STYLES_XML = stylesText
         .replace(/<w:docDefaults[\s\S]*?<\/w:docDefaults>\s*/g, '')
         .replace(/<w:latentStyles[\s\S]*?<\/w:latentStyles>\s*/g, '');
@@ -71,7 +68,7 @@ function toRuns(content, baseOpts = {}) {
             extra.italicsComplexScript = true;
         }
         if (fmt === 'underline') {
-            extra.underline = { type: UnderlineType.SINGLE };
+            extra.underline = {type: UnderlineType.SINGLE};
         }
         if (fmt === 'color' || fmt === 'italicColor') {
             extra.color = seg.color;
@@ -414,4 +411,9 @@ async function build(components) {
     return Packer.toBlob(doc);
 }
 
-export { build };
+export function setAssets(stylesXml, logoBuffer) {
+    STYLES_XML = stylesXml;
+    LOGO_BUFFER = logoBuffer;
+}
+
+export {build};
