@@ -111,6 +111,8 @@ const script3 = `<script>${bundleCode};EDITOR.__run__()</script>`;
 
 // ── 4. Build the HTML ─────────────────────────────────────────────────────────
 const css = fs.readFileSync(path.join(__dirname, 'editor.css'), 'utf8');
+const theme1 = fs.readFileSync(path.join(__dirname, 'theme1.css'), 'utf8');
+
 
 const html = `<!DOCTYPE html>
 <html lang="en">
@@ -120,6 +122,8 @@ const html = `<!DOCTYPE html>
     <title>Document Editor</title>
     <style>
 ${css}    </style>
+    <style>
+${theme1}    </style>
 </head>
 <body>
 
