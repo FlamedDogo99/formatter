@@ -104,13 +104,11 @@ button {
 }
 
 /* ── Insert strips ── */
-/* Always in flow; hidden until hovered directly or an adjacent item-row is hovered */
 .insert-strip {
     display: flex;
     justify-content: center;
     padding: 2px 0;
     min-height: 12px;
-    visibility: hidden;
 }
 
 .insert-strip:hover,
@@ -134,7 +132,6 @@ button {
 
 .item-controls {
     display: flex;
-    visibility: hidden;
     gap: 2px;
     flex-shrink: 0;
 }
@@ -179,7 +176,6 @@ button {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    visibility: hidden;
     flex-shrink: 0;
     padding-top: 4px;
 }
@@ -236,7 +232,6 @@ button {
 }
 
 .row-ctrl-td {
-    visibility: hidden;
 }
 
 .tbl-data-row:hover .row-ctrl-td {
@@ -245,7 +240,6 @@ button {
 
 /* Insert rows */
 .tbl-insert-row {
-    visibility: hidden;
 }
 
 .tbl-insert-row :is(td, th) {

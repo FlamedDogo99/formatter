@@ -6,9 +6,9 @@
     "build": "node build-single-file.mjs"
   },
   "type": "module",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "dependencies": {
+    "fast-json-patch": "^3.1.0"
+  },
   "devDependencies": {
     "esbuild": "^0.25.5"
   }

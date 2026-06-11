@@ -25,30 +25,26 @@ const logoB64 = fs.readFileSync(path.join(__dirname, 'logo.jpeg')).toString('bas
 const script2 = `<script>const __STYLES_XML_RAW__='${stylesEscaped}',__LOGO_B64__="${logoB64}"</script>`;
 
 // ── 3. Bundle the app JS ──────────────────────────────────────────────────────
-// Strategy: bundle as ESM (no TLA — esbuild handles async inside functions),
-// then wrap the output in  !async function(){ <bundle body> }()
-//
-// The patched entry replaces loadAssets() with direct global reads and uses
-// an async IIFE internally (not top-level await) so esbuild is happy with
-// format:'esm' + no TLA support.
+// Patched entry replaces loadAssets() with direct reads from the inline globals
+// set in script2. Uses setAssets() to write into build.js's module scope —
+// bare assignment would hit a different scope after esbuild flattening.
 const patchedEntry = `
 import { Document } from './index.js';
 import { doUndo, doRedo, doImport, doExportState, stateToComponents } from './main.js';
+import { setAssets } from './build.js';
 
-// Called by the outer !async wrapper
 export async function __run__() {
-  // Replace loadAssets(): read from globals set by script2
-  await (async function() {
-    const stylesText = __STYLES_XML_RAW__;
-    STYLES_XML = stylesText
-      .replace(/<w:docDefaults[\\s\\S]*?<\\/w:docDefaults>\\s*/g, '')
-      .replace(/<w:latentStyles[\\s\\S]*?<\\/w:latentStyles>\\s*/g, '');
-    LOGO_BUFFER = (function(b64) {
-      const bin = atob(b64), buf = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-      return buf.buffer;
-    })(__LOGO_B64__);
-  })();
+  // Decode inline globals and push into build.js module scope via setAssets()
+  const stylesText = __STYLES_XML_RAW__;
+  const stylesXml = stylesText
+    .replace(/<w:docDefaults[\\s\\S]*?<\\/w:docDefaults>\\s*/g, '')
+    .replace(/<w:latentStyles[\\s\\S]*?<\\/w:latentStyles>\\s*/g, '');
+  const logoBuffer = (function(b64) {
+    const bin = atob(b64), buf = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    return buf.buffer;
+  })(__LOGO_B64__);
+  setAssets(stylesXml, logoBuffer);
 
   Object.assign(window, { doUndo, doRedo, doImport, doExportState, doExport });
 
@@ -79,32 +75,39 @@ export async function __run__() {
 const entryPath = path.join(__dirname, '_bundle_entry.js');
 fs.writeFileSync(entryPath, patchedEntry);
 
+// Use IIFE format — produces clean vanilla JS with no import/export statements.
+// esbuild wraps everything in  var EDITOR=(()=>{ ...bundle... return exports; })()
+// We then append EDITOR.__run__() to kick off the app.
 const bundleResult = await esbuild.build({
     entryPoints: [entryPath],
     bundle: true,
-    format: 'esm',
+    format: 'iife',
+    globalName: 'EDITOR',
     minify: true,
     target: 'es2020',
     write: false,
     logLevel: 'warning',
+    // history.js imports from a CDN URL — intercept and redirect to local npm package
+    plugins: [{
+        name: 'http-to-npm',
+        setup(build) {
+            build.onResolve({ filter: /^https:\/\// }, args => ({
+                path: args.path.replace(/^https:\/\/esm\.sh\/([^@]+)@[^/]+.*$/, '$1'),
+                external: false,
+                namespace: 'npm-alias',
+            }));
+            build.onLoad({ filter: /.*/, namespace: 'npm-alias' }, args => ({
+                contents: `export * from ${JSON.stringify(args.path)};`,
+                resolveDir: __dirname,
+            }));
+        },
+    }],
 });
 
 fs.unlinkSync(entryPath);
 
-// ESM output looks like:
-//   var STYLES_XML="",LOGO_BUFFER=null;...
-//   async function __run__(){...}
-//   export { __run__ };
-//
-// Strip the `export { __run__ };` line and call __run__() inside the wrapper.
-let bundleCode = bundleResult.outputFiles[0].text.trim();
-
-// Remove the ESM export statement at the end
-bundleCode = bundleCode.replace(/\nexport\s*\{[^}]*\}\s*;?\s*$/, '');
-bundleCode = bundleCode.trim();
-
-// Wrap in !async function(){...}() and call __run__()
-const script3 = `<script>!async function(){${bundleCode};await __run__()}()</script>`;
+const bundleCode = bundleResult.outputFiles[0].text.trim();
+const script3 = `<script>${bundleCode};EDITOR.__run__()</script>`;
 
 // ── 4. Build the HTML ─────────────────────────────────────────────────────────
 const css = fs.readFileSync(path.join(__dirname, 'editor.css'), 'utf8');
